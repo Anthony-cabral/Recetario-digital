@@ -1,0 +1,493 @@
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Arial, sans-serif;
+  background: #f8f8f8;
+  color: #222;
+}
+
+.navbar {
+  height: 70px;
+  padding: 0 60px;
+  background: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.navbar h2 {
+  font-style: italic;
+}
+
+/* Menú con animación de línea */
+.navbar a {
+  position: relative;
+  margin-left: 25px;
+  text-decoration: none;
+  color: #222;
+  font-weight: bold;
+  padding-bottom: 6px;
+}
+
+.navbar a::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 0%;
+  height: 3px;
+  background: #16a34a;
+  border-radius: 20px;
+  transition: width 0.3s ease;
+}
+
+.navbar a:hover::after {
+  width: 100%;
+}
+
+.navbar a:hover {
+  color: #16a34a;
+}
+
+/* Portada */
+.hero {
+  width: 82%;
+  max-width: 1180px;
+  margin: 40px auto;
+  background: linear-gradient(135deg, #ecfdf5, #bbf7d0);
+  border-radius: 32px;
+  display: grid;
+  grid-template-columns: 1.1fr 0.9fr;
+  overflow: hidden;
+  min-height: 420px;
+  box-shadow: 0 18px 45px rgba(0,0,0,0.08);
+}
+
+.hero-text {
+  padding: 60px;
+}
+
+.hero-text span {
+  display: inline-block;
+  background: white;
+  color: #16a34a;
+  padding: 9px 16px;
+  border-radius: 20px;
+  font-weight: bold;
+  margin-bottom: 18px;
+}
+
+.hero-text h1 {
+  font-size: 44px;
+  margin-bottom: 16px;
+  line-height: 1.1;
+}
+
+.hero-text p {
+  margin-bottom: 25px;
+  line-height: 1.5;
+}
+
+.btn-dark {
+  background: #16a34a;
+  color: white;
+  padding: 13px 24px;
+  border-radius: 12px;
+  text-decoration: none;
+  display: inline-block;
+  transition: 0.3s ease;
+}
+
+.btn-dark:hover {
+  background: #15803d;
+  transform: translateY(-3px);
+}
+
+.hero-img img {
+  width: 100%;
+  height: 100%;
+  max-height: 430px;
+  object-fit: cover;
+}
+
+main {
+  width: 82%;
+  max-width: 1180px;
+  margin: auto;
+}
+
+.indicadores {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-bottom: 35px;
+}
+
+.indicador {
+  background: white;
+  padding: 22px;
+  border-radius: 18px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.06);
+}
+
+.indicador h3 {
+  font-size: 32px;
+  color: #16a34a;
+}
+
+.categorias {
+  margin-bottom: 35px;
+}
+
+.categorias h2,
+.titulo-seccion {
+  font-size: 30px;
+  margin-bottom: 20px;
+}
+
+.categoria-lista {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.categoria-lista button {
+  background: white;
+  border: none;
+  padding: 11px 18px;
+  border-radius: 20px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  font-weight: bold;
+  transition: 0.3s ease;
+}
+
+.categoria-lista button:hover {
+  background: #16a34a;
+  color: white;
+  transform: translateY(-3px);
+}
+
+.filtros {
+  display: grid;
+  grid-template-columns: 2fr 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 30px;
+}
+
+input,
+select,
+textarea {
+  width: 100%;
+  padding: 13px;
+  border: 1px solid #ddd;
+  border-radius: 12px;
+  font-size: 15px;
+  outline: none;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: #16a34a;
+  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.12);
+}
+
+textarea {
+  min-height: 90px;
+  resize: vertical;
+}
+
+/* Input de imagen */
+input[type="file"] {
+  background: #f5f5f5;
+  cursor: pointer;
+}
+
+form label {
+  font-weight: bold;
+  margin-top: 5px;
+}
+
+/* Tarjetas pequeñas */
+.lista-recetas {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+  gap: 28px;
+  margin-bottom: 50px;
+}
+
+.receta-card {
+  background: white;
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.08);
+  border: 1px solid #eee;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.receta-card:hover {
+  transform: translateY(-6px);
+  box-shadow: 0 18px 40px rgba(0,0,0,0.12);
+}
+
+.receta-card img {
+  width: 100%;
+  height: 215px;
+  object-fit: cover;
+}
+
+/* Cuando no hay imagen */
+.sin-imagen {
+  width: 100%;
+  height: 215px;
+  background: linear-gradient(135deg, #ecfdf5, #bbf7d0);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #065f46;
+  font-weight: bold;
+  border-bottom: 1px solid rgba(0,0,0,0.05);
+}
+
+.receta-info {
+  padding: 20px;
+}
+
+.receta-info h3 {
+  margin-bottom: 10px;
+  font-size: 21px;
+  line-height: 1.2;
+}
+
+.receta-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 14px;
+  margin-bottom: 14px;
+}
+
+.estrellas {
+  color: #f2a900;
+  font-size: 17px;
+  margin-bottom: 12px;
+}
+
+.acciones {
+  display: flex;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+button {
+  border: none;
+  padding: 11px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: bold;
+  transition: 0.3s ease;
+}
+
+button:hover {
+  transform: translateY(-2px);
+  opacity: 0.92;
+}
+
+.acciones button {
+  flex: 1;
+  padding: 11px;
+  font-size: 14px;
+}
+
+.btn-ver {
+  background: #000;
+  color: white;
+}
+
+.btn-editar {
+  background: #16a34a;
+  color: white;
+}
+
+.btn-eliminar {
+  background: #c03434;
+  color: white;
+}
+
+.admin {
+  background: white;
+  padding: 30px;
+  border-radius: 20px;
+  margin-bottom: 60px;
+  box-shadow: 0 4px 18px rgba(0,0,0,0.07);
+}
+
+.admin h2 {
+  margin-bottom: 20px;
+}
+
+form {
+  display: grid;
+  gap: 14px;
+}
+
+form button {
+  background: #000;
+  color: white;
+}
+
+form button:hover {
+  background: #16a34a;
+}
+
+#btnCancelar {
+  background: #777;
+}
+
+.mensaje {
+  background: white;
+  padding: 30px;
+  border-radius: 15px;
+  text-align: center;
+  grid-column: 1 / -1;
+}
+
+.oculto {
+  display: none;
+}
+
+.modal {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 20px;
+  z-index: 20;
+}
+
+.modal.oculto {
+  display: none;
+}
+
+.modal-contenido {
+  background: #f0fdf4;
+  width: 720px;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 28px;
+  border-radius: 28px;
+  position: relative;
+  animation: abrirModal 0.25s ease;
+  box-shadow: 0 25px 60px rgba(0,0,0,0.25);
+}
+
+@keyframes abrirModal {
+  from {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+#cerrarModal {
+  position: absolute;
+  right: 20px;
+  top: 20px;
+  background: #c03434;
+  color: white;
+  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+}
+
+.detalle-img {
+  width: 100%;
+  height: 340px;
+  object-fit: cover;
+  border-radius: 22px;
+  margin-bottom: 22px;
+}
+
+.detalle h2 {
+  font-size: 32px;
+  margin-bottom: 12px;
+  color: #16a34a;
+}
+
+.detalle p {
+  margin-bottom: 12px;
+  line-height: 1.6;
+  font-size: 16px;
+}
+
+@media (max-width: 800px) {
+  .navbar {
+    padding: 20px;
+  }
+
+  .navbar nav {
+    display: flex;
+    gap: 12px;
+  }
+
+  .navbar a {
+    margin-left: 0;
+    font-size: 14px;
+  }
+
+  .hero,
+  main {
+    width: 92%;
+  }
+
+  .hero {
+    grid-template-columns: 1fr;
+  }
+
+  .indicadores,
+  .filtros {
+    grid-template-columns: 1fr;
+  }
+ 
+}
+
+.btn-login {
+  margin-left: 25px;
+  background: #16a34a;
+  color: white;
+  padding: 10px 18px;
+  border-radius: 14px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+  transition: 0.3s ease;
+}
+
+.btn-login:hover {
+  background: #15803d;
+  transform: translateY(-2px);
+  opacity: 1;
+}
+
+.btn-logout {
+  background: #111;
+}
+
+.btn-logout:hover {
+  background: #333;
+}
