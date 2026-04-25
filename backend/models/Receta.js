@@ -26,13 +26,13 @@ const recetaSchema = new mongoose.Schema({
     required: true
   },
 
-  // ⭐ Promedio (se calcula)
+  // Calcular Promedio
   calificacion: {
     type: Number,
     default: 0
   },
 
-  // ⭐ Lista de calificaciones por usuario
+  // Lista de calificaciones por usuario
   calificaciones: [
     {
       usuario: {
