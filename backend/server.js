@@ -4,9 +4,6 @@ const express = require("express");
 const cors = require("cors");
 const path = require("path");
 
-// Config env primero
-dotenv.config({ path: __dirname + "/.env" });
-
 const connectDB = require("./config/db");
 
 // Crear app
@@ -19,7 +16,7 @@ connectDB();
 app.use(cors());
 app.use(express.json());
 
-// Servir imágenes
+// Servir imágenes (esto puedes dejarlo aunque uses Cloudinary)
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 // Rutas
