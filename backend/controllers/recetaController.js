@@ -32,7 +32,7 @@ exports.crearReceta = async (req, res) => {
       dificultad,
       calificacion: 0,
       calificaciones: [],
-      imagen: req.file ? req.file.filename : ""
+      imagen: req.file ? req.file.path : ""
     });
 
     const guardada = await nueva.save();
@@ -90,7 +90,7 @@ exports.actualizarReceta = async (req, res) => {
     };
 
     if (req.file) {
-      datosActualizados.imagen = req.file.filename;
+      datosActualizados.imagen = req.file.path;
     }
 
     const recetaActualizada = await Receta.findByIdAndUpdate(
@@ -116,9 +116,15 @@ exports.actualizarReceta = async (req, res) => {
 exports.calificarReceta = async (req, res) => {
   try {
     const { calificacion } = req.body;
-    const usuarioId = req.usuario.id;
 
-    if (!calificacion || calificacion < 1 || calificacion > 5) {
+    if (!req.usuario || !req.usuario.id) {
+      return res.status(401).json({ error: "Debe iniciar sesión para calificar" });
+    }
+
+    const usuarioId = req.usuario.id;
+    const valor = Number(calificacion);
+
+    if (!valor || valor < 1 || valor > 5) {
       return res.status(400).json({ error: "La calificación debe estar entre 1 y 5" });
     }
 
@@ -128,28 +134,35 @@ exports.calificarReceta = async (req, res) => {
       return res.status(404).json({ error: "Receta no encontrada" });
     }
 
+    if (!receta.calificaciones) {
+      receta.calificaciones = [];
+    }
+
     const calificacionExistente = receta.calificaciones.find(
-      (item) => item.usuario.toString() === usuarioId
+      (item) => item.usuario && item.usuario.toString() === usuarioId
     );
 
     if (calificacionExistente) {
-      calificacionExistente.valor = Number(calificacion);
+      calificacionExistente.valor = valor;
     } else {
       receta.calificaciones.push({
         usuario: usuarioId,
-        valor: Number(calificacion)
+        valor: valor
       });
     }
 
     const suma = receta.calificaciones.reduce((total, item) => {
-      return total + Number(item.valor);
+      return total + Number(item.valor || 0);
     }, 0);
 
     receta.calificacion = suma / receta.calificaciones.length;
 
     await receta.save();
 
-    res.json(receta);
+    res.json({
+      mensaje: "Calificación guardada correctamente",
+      receta: receta
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

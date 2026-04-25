@@ -1,17 +1,17 @@
 const express = require("express");
 const multer = require("multer");
-const path = require("path");
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
 const router = express.Router();
 const controller = require("../controllers/recetaController");
+const { verificarToken } = require("../middlewares/authMiddleware");
+const cloudinary = require("../config/cloudinary");
 
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    const nombreArchivo = Date.now() + path.extname(file.originalname);
-    cb(null, nombreArchivo);
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "recetas",
+    allowed_formats: ["jpg", "png", "jpeg", "webp"]
   }
 });
 
@@ -22,5 +22,6 @@ router.get("/:id", controller.obtenerReceta);
 router.post("/", upload.single("imagen"), controller.crearReceta);
 router.put("/:id", upload.single("imagen"), controller.actualizarReceta);
 router.delete("/:id", controller.eliminarReceta);
+router.put("/:id/calificar", verificarToken, controller.calificarReceta);
 
 module.exports = router;

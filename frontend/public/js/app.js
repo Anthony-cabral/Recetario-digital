@@ -32,6 +32,43 @@ const btnLogout = document.getElementById("btnLogout");
 
 let recetas = [];
 
+// Mensaje bonito
+function mostrarMensaje(texto, tipo = "success") {
+  const toast = document.createElement("div");
+  toast.className = `toast ${tipo}`;
+  toast.textContent = texto;
+
+  document.body.appendChild(toast);
+
+  setTimeout(() => {
+    toast.remove();
+  }, 3000);
+}
+
+// Modal de confirmación
+function abrirConfirmacion(titulo, mensaje, accionConfirmar) {
+  detalleReceta.innerHTML = `
+    <div class="confirm-box">
+      <h2>${titulo}</h2>
+      <p>${mensaje}</p>
+
+      <div class="confirm-acciones">
+        <button class="btn-cancelar" onclick="cerrarDetalle()">Cancelar</button>
+        <button class="btn-confirmar" id="btnConfirmarAccion">Confirmar</button>
+      </div>
+    </div>
+  `;
+
+  modalDetalle.classList.remove("oculto");
+
+  document.getElementById("btnConfirmarAccion").addEventListener("click", accionConfirmar);
+}
+
+// Cerrar modal detalle
+function cerrarDetalle() {
+  modalDetalle.classList.add("oculto");
+}
+
 // Validar vista por rol
 function controlarVistaPorRol() {
   const admin = document.getElementById("admin");
@@ -56,11 +93,16 @@ function controlarVistaPorRol() {
 
 // Cargar recetas
 async function cargarRecetas() {
-  const res = await fetch(API_URL);
-  recetas = await res.json();
+  try {
+    const res = await fetch(API_URL);
+    recetas = await res.json();
 
-  mostrarRecetas(recetas);
-  actualizarIndicadores();
+    mostrarRecetas(recetas);
+    actualizarIndicadores();
+  } catch (error) {
+    mostrarMensaje("No se pudieron cargar las recetas", "error");
+    console.error(error);
+  }
 }
 
 // Mostrar recetas
@@ -73,7 +115,7 @@ function mostrarRecetas(lista) {
   }
 
   lista.forEach((r) => {
-    const imagen = r.imagen ? `/uploads/${r.imagen}` : null;
+    const imagen = r.imagen || null;
 
     const card = document.createElement("div");
     card.classList.add("receta-card");
@@ -151,7 +193,7 @@ formReceta.addEventListener("submit", async (e) => {
   e.preventDefault();
 
   if (rol !== "admin") {
-    alert("No tienes permiso para realizar esta acción.");
+    mostrarMensaje("No tienes permiso para realizar esta acción.", "error");
     return;
   }
 
@@ -175,83 +217,102 @@ formReceta.addEventListener("submit", async (e) => {
   const url = id ? `${API_URL}/${id}` : API_URL;
   const method = id ? "PUT" : "POST";
 
-  const respuesta = await fetch(url, {
-    method: method,
-    headers: {
-      Authorization: token
-    },
-    body: formData
-  });
+  try {
+    const respuesta = await fetch(url, {
+      method: method,
+      headers: {
+        Authorization: `Bearer ${token}`
+      },
+      body: formData
+    });
 
-  const data = await respuesta.json();
+    const data = await respuesta.json();
 
-  if (!respuesta.ok) {
-    alert(data.error || "Ocurrió un error");
-    return;
+    if (!respuesta.ok) {
+      mostrarMensaje(data.error || "Ocurrió un error", "error");
+      return;
+    }
+
+    mostrarMensaje(id ? "Receta actualizada correctamente" : "Receta guardada correctamente");
+
+    limpiarFormulario();
+    await cargarRecetas();
+  } catch (error) {
+    mostrarMensaje("No se pudo guardar la receta", "error");
+    console.error(error);
   }
-
-  alert(id ? "Receta actualizada correctamente" : "Receta guardada correctamente");
-
-  limpiarFormulario();
-  await cargarRecetas();
 });
 
 // Editar receta admin
 function editarReceta(id) {
   if (rol !== "admin") {
-    alert("Solo el admin puede editar recetas.");
+    mostrarMensaje("Solo el admin puede editar recetas.", "error");
     return;
   }
 
-  const r = recetas.find((x) => x._id === id);
+  abrirConfirmacion(
+    "Editar receta",
+    "¿Deseas editar esta receta?",
+    () => {
+      const r = recetas.find((x) => x._id === id);
 
-  if (!r) {
-    alert("No se encontró la receta");
-    return;
-  }
+      if (!r) {
+        mostrarMensaje("No se encontró la receta", "error");
+        return;
+      }
 
-  document.getElementById("recetaId").value = r._id;
-  document.getElementById("nombre").value = r.nombre || "";
-  document.getElementById("categoria").value = r.categoria || "";
-  document.getElementById("ingredientes").value = r.ingredientes || "";
-  document.getElementById("pasos").value = r.pasos || "";
-  document.getElementById("tiempoPreparacion").value = r.tiempoPreparacion || "";
-  document.getElementById("dificultad").value = r.dificultad || "";
+      document.getElementById("recetaId").value = r._id;
+      document.getElementById("nombre").value = r.nombre || "";
+      document.getElementById("categoria").value = r.categoria || "";
+      document.getElementById("ingredientes").value = r.ingredientes || "";
+      document.getElementById("pasos").value = r.pasos || "";
+      document.getElementById("tiempoPreparacion").value = r.tiempoPreparacion || "";
+      document.getElementById("dificultad").value = r.dificultad || "";
 
-  tituloFormulario.textContent = "Editar receta";
-  btnCancelar.classList.remove("oculto");
+      tituloFormulario.textContent = "Editar receta";
+      btnCancelar.classList.remove("oculto");
 
-  document.getElementById("admin").scrollIntoView({ behavior: "smooth" });
+      cerrarDetalle();
+      document.getElementById("admin").scrollIntoView({ behavior: "smooth" });
+    }
+  );
 }
 
 // Eliminar receta admin
 async function eliminarReceta(id) {
   if (rol !== "admin") {
-    alert("Solo el admin puede eliminar recetas.");
+    mostrarMensaje("Solo el admin puede eliminar recetas.", "error");
     return;
   }
 
-  if (!confirm("¿Eliminar receta?")) {
-    return;
-  }
+  abrirConfirmacion(
+    "Eliminar receta",
+    "¿Estás seguro de que deseas eliminar esta receta? Esta acción no se puede deshacer.",
+    async () => {
+      try {
+        const respuesta = await fetch(`${API_URL}/${id}`, {
+          method: "DELETE",
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
 
-  const respuesta = await fetch(`${API_URL}/${id}`, {
-    method: "DELETE",
-    headers: {
-      Authorization: token
+        const data = await respuesta.json();
+
+        if (!respuesta.ok) {
+          mostrarMensaje(data.error || "No se pudo eliminar", "error");
+          return;
+        }
+
+        cerrarDetalle();
+        mostrarMensaje("Receta eliminada correctamente");
+        await cargarRecetas();
+      } catch (error) {
+        mostrarMensaje("No se pudo eliminar la receta", "error");
+        console.error(error);
+      }
     }
-  });
-
-  const data = await respuesta.json();
-
-  if (!respuesta.ok) {
-    alert(data.error || "No se pudo eliminar");
-    return;
-  }
-
-  alert("Receta eliminada correctamente");
-
-  await cargarRecetas();
+  );
 }
 
 // Ver detalle
@@ -259,11 +320,11 @@ function verDetalle(id) {
   const r = recetas.find((x) => x._id === id);
 
   if (!r) {
-    alert("No se encontró la receta");
+    mostrarMensaje("No se encontró la receta", "error");
     return;
   }
 
-  const imagen = r.imagen ? `/uploads/${r.imagen}` : null;
+  const imagen = r.imagen || null;
 
   detalleReceta.innerHTML = `
     <div class="detalle">
@@ -289,15 +350,32 @@ function verDetalle(id) {
   modalDetalle.classList.remove("oculto");
 }
 
-// Abrir calificación
+// Abrir calificación con estrellas
 function abrirCalificacion(id) {
-  const valor = prompt("Califica esta receta del 1 al 5:");
+  const r = recetas.find((x) => x._id === id);
 
-  if (!valor) {
+  if (!r) {
+    mostrarMensaje("No se encontró la receta", "error");
     return;
   }
 
-  calificarReceta(id, Number(valor));
+  detalleReceta.innerHTML = `
+    <div class="modal-rating">
+      <h2>Calificar receta</h2>
+      <p><strong>${r.nombre}</strong></p>
+      <p>Selecciona una calificación:</p>
+
+      <div class="rating-estrellas">
+        <button onclick="calificarReceta('${id}', 1)">★</button>
+        <button onclick="calificarReceta('${id}', 2)">★</button>
+        <button onclick="calificarReceta('${id}', 3)">★</button>
+        <button onclick="calificarReceta('${id}', 4)">★</button>
+        <button onclick="calificarReceta('${id}', 5)">★</button>
+      </div>
+    </div>
+  `;
+
+  modalDetalle.classList.remove("oculto");
 }
 
 // Calificar receta
@@ -308,32 +386,37 @@ async function calificarReceta(id, valor) {
   }
 
   if (valor < 1 || valor > 5) {
-    alert("La calificación debe ser entre 1 y 5.");
+    mostrarMensaje("La calificación debe ser entre 1 y 5.", "error");
     return;
   }
 
-  const respuesta = await fetch(`${API_URL}/${id}/calificar`, {
-    method: "PUT",
-    headers: {
-      "Content-Type": "application/json",
-      Authorization: token
-    },
-    body: JSON.stringify({
-      calificacion: valor
-    })
-  });
+  try {
+    const respuesta = await fetch(`${API_URL}/${id}/calificar`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`
+      },
+      body: JSON.stringify({
+        calificacion: valor
+      })
+    });
 
-  const data = await respuesta.json();
+    const data = await respuesta.json();
 
-  if (!respuesta.ok) {
-    alert(data.error || "No se pudo calificar");
-    return;
+    if (!respuesta.ok) {
+      mostrarMensaje(data.error || "No se pudo calificar", "error");
+      return;
+    }
+
+    mostrarMensaje("Calificación guardada correctamente");
+
+    modalDetalle.classList.add("oculto");
+    await cargarRecetas();
+  } catch (error) {
+    mostrarMensaje("No se pudo guardar la calificación", "error");
+    console.error(error);
   }
-
-  alert("Calificación guardada correctamente");
-
-  modalDetalle.classList.add("oculto");
-  await cargarRecetas();
 }
 
 // Abrir login
@@ -395,12 +478,12 @@ formAuth.addEventListener("submit", async (e) => {
     try {
       data = await respuesta.json();
     } catch {
-      alert("Error del servidor. No se recibió una respuesta válida.");
+      mostrarMensaje("Error del servidor. No se recibió una respuesta válida.", "error");
       return;
     }
 
     if (!respuesta.ok) {
-      alert(data.error || "No se pudo registrar o iniciar sesión. Verifique los datos.");
+      mostrarMensaje(data.error || "No se pudo registrar o iniciar sesión. Verifique los datos.", "error");
       return;
     }
 
@@ -415,9 +498,9 @@ formAuth.addEventListener("submit", async (e) => {
       controlarVistaPorRol();
       mostrarRecetas(recetas);
 
-      alert("Sesión iniciada correctamente");
+      mostrarMensaje("Sesión iniciada correctamente");
     } else {
-      alert("Usuario creado correctamente. Ahora inicia sesión.");
+      mostrarMensaje("Usuario creado correctamente. Ahora inicia sesión.");
 
       modoLogin = true;
       tituloAuth.textContent = "Iniciar sesión";
@@ -427,7 +510,7 @@ formAuth.addEventListener("submit", async (e) => {
       formAuth.reset();
     }
   } catch (error) {
-    alert("No se pudo conectar con el servidor. Verifique que el backend esté encendido.");
+    mostrarMensaje("No se pudo conectar con el servidor. Verifique que el backend esté encendido.", "error");
     console.error(error);
   }
 });
@@ -442,6 +525,8 @@ function cerrarSesion() {
 
   controlarVistaPorRol();
   mostrarRecetas(recetas);
+
+  mostrarMensaje("Sesión cerrada correctamente", "info");
 }
 
 // Cerrar modal detalle
