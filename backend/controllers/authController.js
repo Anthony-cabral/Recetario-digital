@@ -31,11 +31,13 @@ exports.login = async (req, res) => {
 
   if (!valido) return res.status(400).json({ error: "Contraseña incorrecta" });
 
-  const token = jwt.sign(
-    { id: usuario._id, rol: usuario.rol },
-    "secreto",
-    { expiresIn: "1d" }
-  );
-
+ const token = jwt.sign(
+  {
+    id: usuario._id,
+    rol: usuario.rol
+  },
+  process.env.JWT_SECRET || "secreto",
+  { expiresIn: "1d" }
+);
   res.json({ token, rol: usuario.rol });
 };
